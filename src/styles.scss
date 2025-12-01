@@ -1,3 +1,5 @@
+@use "ncm-css-override";
+
 @mixin mixed-background-color($bgcolor-rgb, $fgcolor-rgb, $transparency) {
 	background: linear-gradient(0deg, rgba($fgcolor-rgb, $transparency), rgba($fgcolor-rgb, $transparency)), rgba($bgcolor-rgb, 1);
 }
@@ -6,7 +8,7 @@
 }
 body:not(.ignore-now-playing), body.ignore-now-playing:not(.mq-playing) {
 	// Override ncm css variables
-	@import "ncm-css-override";
+	@include ncm-css-override.ncm-css-override;
     --themeC1: var(--md-accent-color);
     --themeC1-rgb: var(--md-accent-color-rgb);
     --themeC1-hvr: var(--md-accent-color);
