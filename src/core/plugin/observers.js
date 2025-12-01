@@ -1,4 +1,5 @@
 import { waitForElement, waitForElementAsync, makeToast } from "../../utils/dom.js";
+import { debounce } from "../../utils/common.js";
 import { TimeIndicator } from "../../components/TimeIndicator/index.js";
 import { ListViewSwitcher } from "../../components/ListViewSwitcher/index.js";
 import { initSettingMenu } from "../../components/Settings/index.js";
@@ -15,22 +16,17 @@ export const initObservers = () => {
 	});
 
 	// Alternative time indicator
-	waitForElement('#main-player', (dom) => {
-		const timeIndicator = document.createElement('div');
-		timeIndicator.style.position = 'unset';
-		timeIndicator.classList.add('time-indicator-container');
-		timeIndicator.classList.add('md-time-indicator-container');
-		dom.appendChild(timeIndicator);
-		ReactDOM.render(<TimeIndicator parentDOM={dom}/>, timeIndicator);
-	});
-	waitForElement('.m-player-fm', (dom) => {
-		const timeIndicator = document.createElement('div');
-		timeIndicator.style.position = 'unset';
-		timeIndicator.classList.add('time-indicator-container');
-		timeIndicator.classList.add('md-time-indicator-container');
-		dom.appendChild(timeIndicator);
-		ReactDOM.render(<TimeIndicator parentDOM={dom}/>, timeIndicator);
-	});
+    const injectTimeIndicator = (selector) => {
+        waitForElement(selector, (dom) => {
+            const timeIndicator = document.createElement('div');
+            timeIndicator.style.position = 'unset';
+            timeIndicator.classList.add('time-indicator-container', 'md-time-indicator-container');
+            dom.appendChild(timeIndicator);
+            ReactDOM.render(<TimeIndicator parentDOM={dom}/>, timeIndicator);
+        });
+    }
+    injectTimeIndicator('#main-player');
+    injectTimeIndicator('.m-player-fm');
 
 	// Alternative jump to playing location button
 	waitForElement('#main-player', (dom) => {
@@ -48,31 +44,25 @@ export const initObservers = () => {
 		}).observe(queueNotifyToast, { attributes: true, attributeFilter: ['class'] });
 	});
 
-	// Greeting and two recomment playlists
+	// Greeting, recommend playlists, and main content observers
 	setInterval(() => {
 		updateGreeting();
 		updateDailyRecommendationDate();
 	}, 30000);
 	updateGreeting();
-	waitForElement('.g-mn', (dom) => {
-		new MutationObserver(() => {
-			try { initRecommendPlaylists();} catch (e) {}
-			removeRedundantPlaylists();
-		}).observe(dom, { childList: true, subtree: true });
-		window.initRecommendPlaylistsInterval = setInterval(() => {
-			try { initRecommendPlaylists();} catch (e) {}
-		}, 100);
-	});
-
 
 	waitForElement('.g-mn', (dom) => {
-		new MutationObserver(() => {
-			// action buttons innerText to css property
+        const observerCallback = debounce(() => {
+            // Recommend Playlists
+            try { initRecommendPlaylists(); } catch (e) {}
+            removeRedundantPlaylists();
+
+            // Action buttons innerText to css property
 			const buttons = document.querySelectorAll('.u-ibtn5');
 			for (let button of buttons) {
 				button.style.setProperty('--text', `'${button.innerText}'`);
 			}
-			// 单曲数，专辑数，MV 数
+			// Artist Info: Songs, Albums, MV counts
 			const artistInfoItems = document.querySelectorAll('.g-mn .m-info .inf .item');
 			for (let item of artistInfoItems) {
                 const match = item.innerHTML.match(/(\d+)/);
@@ -81,23 +71,32 @@ export const initObservers = () => {
                 }
 			}
 			
-			// playlist title size recalculation
+			// Playlist title size recalculation
 			recalculateTitleSize();
 
-			// add custom jump to playing button
+			// Add custom jump to playing button
 			if (document.querySelector('.u-playinglocation')) {
 				if (!document.querySelector('.u-playinglocation + .u-playinglocation')) {
 					const button = document.createElement('button');
-					button.classList.add('u-playinglocation');
-					button.classList.add('j-flag');
+					button.classList.add('u-playinglocation', 'j-flag');
 					button.innerHTML = '<svg><use xlink:href="orpheus://orpheus/style/res/svg/icon.sp.svg#playinglocation"></use></svg>';
 					button.addEventListener('click', () => {
 						scrollToCurrentPlaying();
 					});
-					document.querySelector('.u-playinglocation').after(button);
+                    const originalBtn = document.querySelector('.u-playinglocation');
+                    if (originalBtn && originalBtn.parentNode) {
+					    originalBtn.after(button);
+                    }
 				}
 			}
-		}).observe(dom, { childList: true, subtree: true });
+        }, 200);
+
+		new MutationObserver(observerCallback).observe(dom, { childList: true, subtree: true });
+		
+        // Keep a less frequent interval as fallback for playlist initialization
+        window.initRecommendPlaylistsInterval = setInterval(() => {
+			try { initRecommendPlaylists();} catch (e) {}
+		}, 1000);
 	});
 	window.addEventListener('resize', () => {
 		recalculateTitleSize();

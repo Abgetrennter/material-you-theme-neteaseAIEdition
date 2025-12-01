@@ -1,7 +1,20 @@
-export const chunk = (input, size) => {
-	return input.reduce((arr, item, idx) => {
-		return idx % size === 0
-			? [...arr, [item]]
-			: [...arr.slice(0, -1), [...arr.slice(-1)[0], item]];
-	}, []);
+export const debounce = (func, wait) => {
+	let timeout;
+	return function (...args) {
+		const context = this;
+		clearTimeout(timeout);
+		timeout = setTimeout(() => func.apply(context, args), wait);
+	};
+};
+
+export const throttle = (func, limit) => {
+	let inThrottle;
+	return function (...args) {
+		const context = this;
+		if (!inThrottle) {
+			func.apply(context, args);
+			inThrottle = true;
+			setTimeout(() => (inThrottle = false), limit);
+		}
+	};
 };
