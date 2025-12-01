@@ -1,7 +1,9 @@
-import { getSetting, setSetting } from "./utils";
-import { schemePresets } from "./scheme-presets";
-import { applyScheme, getThemeCSSFromColor, updateDynamicTheme } from "./main";
-import './settings.scss';
+import { getSetting, setSetting } from "../../utils/settings";
+import { schemePresets } from "../../core/theme/presets";
+import { applyScheme } from "../../core/theme/applyScheme";
+import { getThemeCSSFromColor, updateDynamicTheme } from "../../core/theme/dynamicTheme";
+import './style.scss';
+
 class MDSettings extends React.Component {
 	constructor(props) {
 		super(props);
@@ -51,9 +53,15 @@ class MDSettings extends React.Component {
 					onClick={ () => {
 						if (!this.state.open) {
 							this.playingProgressInterval = setInterval(() => {
-								document.body.style.setProperty('--md-now-playing-persentage', document.querySelector(".m-player .prg .has").style.width);
+                                const has = document.querySelector(".m-player .prg .has");
+                                if (has) {
+								    document.body.style.setProperty('--md-now-playing-persentage', has.style.width);
+                                }
 							}, 500);
-							document.body.style.setProperty('--md-now-playing-persentage', document.querySelector(".m-player .prg .has").style.width);
+                            const has = document.querySelector(".m-player .prg .has");
+                            if (has) {
+							    document.body.style.setProperty('--md-now-playing-persentage', has.style.width);
+                            }
 						} else {
 							clearInterval(this.playingProgressInterval);
 						}
@@ -118,7 +126,7 @@ class MDSettings extends React.Component {
 									}
 									setSetting('hide-ncm-logo', e.target.checked);
 								}} />
-								<label for="md-hide-ncm-logo" className="md-checkbox-label">隐藏网易云 Logo</label>
+								<label htmlFor="md-hide-ncm-logo" className="md-checkbox-label">隐藏网易云 Logo</label>
 							</div>
 							<div className="md-checkbox-wrapper">
 								<input id="md-capsule-sidebar" type="checkbox" className="md-checkbox" checked={ this.state.capsuleSidebar } onChange={ (e) => {
@@ -130,7 +138,7 @@ class MDSettings extends React.Component {
 									}
 									setSetting('capsule-sidebar', e.target.checked);
 								}} />
-								<label for="md-capsule-sidebar" className="md-checkbox-label">胶囊侧栏</label>
+								<label htmlFor="md-capsule-sidebar" className="md-checkbox-label">胶囊侧栏</label>
 							</div>
 						</>
 					}
@@ -144,7 +152,7 @@ class MDSettings extends React.Component {
 							}
 							setSetting('disable-new-ui', e.target.checked);
 						}} />
-						<label for="md-disable-new-ui" className="md-checkbox-label">禁用新 UI</label>
+						<label htmlFor="md-disable-new-ui" className="md-checkbox-label">禁用新 UI</label>
 					</div>
 					<div className="md-checkbox-wrapper">
 						<input id="md-floating-bottombar" type="checkbox" className="md-checkbox" checked={ this.state.floatingBottombar } onChange={ (e) => {
@@ -156,7 +164,7 @@ class MDSettings extends React.Component {
 							}
 							setSetting('floating-bottombar', e.target.checked);
 						}} />
-						<label for="md-floating-bottombar" className="md-checkbox-label">悬浮底栏</label>
+						<label htmlFor="md-floating-bottombar" className="md-checkbox-label">悬浮底栏</label>
 					</div>
 					<div className="md-checkbox-wrapper md-transparent-framework-switch">
 						<input id="md-transparent-framework" type="checkbox" className="md-checkbox" checked={ this.state.transparentFramework } onChange={ (e) => {
@@ -168,7 +176,7 @@ class MDSettings extends React.Component {
 							}
 							setSetting('transparent-framework', e.target.checked);
 						}} />
-						<label for="md-transparent-framework" className="md-checkbox-label">全透明框架</label>
+						<label htmlFor="md-transparent-framework" className="md-checkbox-label">全透明框架</label>
 					</div>
 					<div className="md-theme-setting-subtitle">其他设置</div>
 					<div className="md-checkbox-wrapper">
@@ -181,7 +189,7 @@ class MDSettings extends React.Component {
 							}
 							setSetting('ignore-now-playing-page', e.target.checked);
 						}} />
-						<label for="md-ignore-now-playing-page" className="md-checkbox-label">在正在播放页面中不应用主题</label>
+						<label htmlFor="md-ignore-now-playing-page" className="md-checkbox-label">在正在播放页面中不应用主题</label>
 					</div>
 					<div className="md-checkbox-wrapper">
 						<input id="md-disable-comment-style" type="checkbox" className="md-checkbox" checked={ this.state.disableCommentStyle } onChange={ (e) => {
@@ -193,7 +201,7 @@ class MDSettings extends React.Component {
 							}
 							setSetting('disable-comment-style', e.target.checked);
 						}} />
-						<label for="md-disable-comment-style" className="md-checkbox-label">禁用评论区样式</label>
+						<label htmlFor="md-disable-comment-style" className="md-checkbox-label">禁用评论区样式</label>
 					</div>
 				</div>
 			</div>
@@ -397,7 +405,7 @@ class CustomSchemeSetting extends React.Component {
 					<input id="md-custom-scheme-light" type="checkbox" className="md-checkbox" checked={ this.state.scheme.light } onChange={ (e) => {
 						this.setColor('light', e.target.checked);
 					}} />
-					<label for="md-custom-scheme-light" className="md-checkbox-label">亮色主题</label>
+					<label htmlFor="md-custom-scheme-light" className="md-checkbox-label">亮色主题</label>
 				</div>
 			</div>
 		);
@@ -515,9 +523,6 @@ function CustomDynamicThemeSetting(props) {
 		)
 	);
 }
-
-
-
 
 export const initSettingMenu = () => {
 	const user = document.querySelector('header .m-tool .user');

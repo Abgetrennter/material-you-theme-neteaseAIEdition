@@ -1,5 +1,5 @@
-import './list-view-switcher.scss';
-import { getSetting, setSetting } from './utils.js';
+import './style.scss';
+import { getSetting, setSetting } from '../../utils/settings.js';
 
 export function ListViewSwitcher() {
 	const [currentView, setCurrentView] = React.useState(getSetting('list-view', 'comfortable')); // compact, comfortable, spacious

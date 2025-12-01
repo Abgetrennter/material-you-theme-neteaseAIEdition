@@ -3,6 +3,7 @@ export const injectCSS = (css) => {
 	style.innerHTML = css;
 	document.head.appendChild(style);
 }
+
 export const injectHTML = (type, html, parent, fun = (dom) => {}) => {
 	const dom = document.createElement(type);
 	dom.innerHTML = html;
@@ -11,68 +12,54 @@ export const injectHTML = (type, html, parent, fun = (dom) => {}) => {
 	parent.appendChild(dom);
 	return dom;
 }
+
 export const waitForElement = (selector, fun) => {
-	selector = selector.split(',');
+	const selectors = selector.split(',');
 	let done = true;
-	for (const s of selector) {
+	for (const s of selectors) {
 		if (!document.querySelector(s)) {
 			done = false;
 		}
 	}
 	if (done) {
-		for (const s of selector) {
+		for (const s of selectors) {
 			fun.call(this, document.querySelector(s));
 		}
 		return;
 	}
 	let interval = setInterval(() => {
 		let done = true;
-		for (const s of selector) {
+		for (const s of selectors) {
 			if (!document.querySelector(s)) {
 				done = false;
 			}
 		}
 		if (done) {
 			clearInterval(interval);
-			for (const s of selector) {
+			for (const s of selectors) {
 				fun.call(this, document.querySelector(s));
 			}
 		}
 	}, 100);
 }
+
 export const waitForElementAsync = async (selector) => {
 	if (document.querySelector(selector)) {
 		return document.querySelector(selector);
 	}
+    // Assuming betterncm is available globally
 	return await betterncm.utils.waitForElement(selector);
 }
-export const getSetting = (option, defaultValue = '') => {
-	option = "material-you-theme-" + option;
-	let value = localStorage.getItem(option);
-	if (!value) {
-		value = defaultValue;
-	}
-	if (value === 'true') {
-		value = true;
-	} else if (value === 'false') {
-		value = false;
-	}
-	return value;
-}
-export const setSetting = (option, value) => {
-	option = "material-you-theme-" + option;
-	localStorage.setItem(option, value);
-}
+
 export const makeToast = (html, duration = 1000) => {
 	let noIntroAnimation = false;
-	if (document.querySelector('.md-toast')) {
+	const existingToast = document.querySelector('.md-toast');
+	if (existingToast) {
 		noIntroAnimation = true;
-		document.querySelector('.md-toast').remove();
+		existingToast.remove();
 	}
 	const toast = document.createElement('div');
-	toast.classList.add('md-toast');
-	toast.classList.add('u-result');
-	toast.classList.add('j-tips');
+	toast.classList.add('md-toast', 'u-result', 'j-tips');
 	toast.innerHTML = `
 		<div class="wrap">
 			<div class="inner j-flag" style="${ noIntroAnimation ? 'animation-duration: 0s;' : ''}">
@@ -83,16 +70,12 @@ export const makeToast = (html, duration = 1000) => {
 	document.body.appendChild(toast);
 	setTimeout(() => {
 		toast.classList.add('z-hide');
-		toast.querySelector('.inner').style = '';
+		const inner = toast.querySelector('.inner');
+		if(inner) inner.style = '';
 	}, duration);
 	setTimeout(() => {
-		document.body.removeChild(toast);
+        if (toast.parentNode) {
+		    document.body.removeChild(toast);
+        }
 	}, duration + 500);
 }
-export const chunk = (input, size) => {
-	return input.reduce((arr, item, idx) => {
-		return idx % size === 0
-			? [...arr, [item]]
-			: [...arr.slice(0, -1), [...arr.slice(-1)[0], item]];
-	}, []);
-};

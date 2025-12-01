@@ -1,4 +1,4 @@
-import './ripple.scss';
+import './style.scss';
 
 const getCloestRippleElement = (e) => {
 	const target = e.target;

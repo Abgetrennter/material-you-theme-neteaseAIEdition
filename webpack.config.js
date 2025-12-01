@@ -29,17 +29,28 @@ class CopyToTargetPlugin {
         }
       }
 
+      const copyRecursiveSync = (src, dest) => {
+        const stats = fs.statSync(src);
+        if (stats.isDirectory()) {
+            if (!fs.existsSync(dest)) {
+                fs.mkdirSync(dest);
+            }
+            fs.readdirSync(src).forEach((childItemName) => {
+                copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName));
+            });
+        } else {
+            fs.copyFileSync(src, dest);
+        }
+      };
+
       try {
         if (fs.existsSync(distDir)) {
             const files = fs.readdirSync(distDir);
             files.forEach((file) => {
-            const srcFile = path.join(distDir, file);
-            const destFile = path.join(targetDir, file);
-
-            if (fs.lstatSync(srcFile).isFile()) {
-                fs.copyFileSync(srcFile, destFile);
+                const srcFile = path.join(distDir, file);
+                const destFile = path.join(targetDir, file);
+                copyRecursiveSync(srcFile, destFile);
                 console.log(`[CopyToTargetPlugin] Copied ${file} to ${targetDir}`);
-            }
             });
         }
       } catch (err) {
@@ -72,8 +83,8 @@ const config = {
               to: path.resolve(__dirname, "dist", "manifest.json"),
             },
             {
-              from: path.resolve(__dirname, "src", "preview.gif"),
-              to: path.resolve(__dirname, "dist", "preview.gif"),
+              from: path.resolve(__dirname, "src", "assets"),
+              to: path.resolve(__dirname, "dist", "assets"),
             }
         ]
     }),
