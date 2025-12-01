@@ -1,0 +1,6 @@
+@mixin mixed-background-color($bgcolor-rgb, $fgcolor-rgb, $transparency) {
+	background: linear-gradient(0deg, rgba($fgcolor-rgb, $transparency), rgba($fgcolor-rgb, $transparency)), rgba($bgcolor-rgb, 1);
+}
+@mixin mixed-background-color-important($bgcolor-rgb, $fgcolor-rgb, $transparency) {
+	background: linear-gradient(0deg, rgba($fgcolor-rgb, $transparency), rgba($fgcolor-rgb, $transparency)), rgba($bgcolor-rgb, 1) !important;
+}

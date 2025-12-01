@@ -1,6 +1,6 @@
 import { themeFromSourceColor, QuantizerCelebi, Hct, Score, SchemeExpressive, SchemeVibrant, SchemeMonochrome, SchemeFidelity, SchemeTonalSpot, SchemeNeutral, MaterialDynamicColors } from "@material/material-color-utilities";
 import { argb2Rgb } from "./colors.js";
-import { getSetting, chunk } from "../../utils/index.js"; // Need to export chunk from utils
+import { getSetting } from "../../utils/index.js";
 
 export const getDynamicThemeColor = () => {
 	const source = window.mdDynamicThemeColorSource ?? getSetting('dynamic-theme-color-source', 'cover');
@@ -132,9 +132,17 @@ export const updateDynamicColorFromCover = () => {
 	canvas.height = 48;
 	const ctx = canvas.getContext('2d');
 	ctx.drawImage(dom, 0, 0, 48, 48);
-	const pixels = chunk(ctx.getImageData(0, 0, 48, 48).data, 4).map((pixel) => {
-		return ((pixel[3] << 24 >>> 0) | (pixel[0] << 16 >>> 0) | (pixel[1] << 8 >>> 0) | pixel[2]) >>> 0;
-	});
+    const data = ctx.getImageData(0, 0, 48, 48).data;
+    const pixels = [];
+    for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
+        if (a < 255) continue; // Skip transparent pixels
+        const argb = ((a << 24) | (r << 16) | (g << 8) | b) >>> 0;
+        pixels.push(argb);
+    }
 
 	const quantizedColors = QuantizerCelebi.quantize(pixels, 128);
 	const ranked = Score.score(quantizedColors);
@@ -167,9 +175,17 @@ export const updateDynamicColorFromBGEnhanced = () => {
 	canvas.height = height;
 	const ctx = canvas.getContext('2d');
 	ctx.drawImage(dom, 0, 0, width, height);
-	const pixels = chunk(ctx.getImageData(0, 0, width, height).data, 4).map((pixel) => {
-		return ((pixel[3] << 24 >>> 0) | (pixel[0] << 16 >>> 0) | (pixel[1] << 8 >>> 0) | pixel[2]) >>> 0;
-	});
+    const data = ctx.getImageData(0, 0, width, height).data;
+    const pixels = [];
+    for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
+        if (a < 255) continue; // Skip transparent pixels
+        const argb = ((a << 24) | (r << 16) | (g << 8) | b) >>> 0;
+        pixels.push(argb);
+    }
 
 	const quantizedColors = QuantizerCelebi.quantize(pixels, 128);
 	const ranked = Score.score(quantizedColors);

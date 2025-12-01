@@ -1,0 +1,32 @@
+@use "ncm-override";
+@use "mixins" as *;
+
+@mixin global-styles {
+	// Override ncm css variables
+	@include ncm-override.ncm-css-override;
+    --themeC1: var(--md-accent-color);
+    --themeC1-rgb: var(--md-accent-color-rgb);
+    --themeC1-hvr: var(--md-accent-color);
+    --themePlay: var(--md-accent-color);
+    --themePlay-hvr: var(--md-accent-color);
+    --icnTheme: var(--md-accent-color);
+    --icnTheme-hvr: var(--md-accent-color);
+    --icnTheme-lighten: var(--md-accent-color);
+
+	// Global
+
+	background-color: var(--md-accent-color-bg);
+
+	::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	::-webkit-scrollbar-thumb {
+		background: rgba(var(--md-accent-color-secondary-rgb), 0.1);
+	}
+	.g-hd, .m-player, .m-player, .m-player .spk.z-silence:after {
+		background: transparent;
+	}
+	.g-hd:after {
+		display: none;
+	}
+}
