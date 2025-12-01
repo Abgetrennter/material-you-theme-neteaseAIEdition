@@ -6,8 +6,48 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const copyWebpackPlugin = require("copy-webpack-plugin");
 const TerserPlugin = require('terser-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const fs = require("fs");
 
 const isProduction = process.env.NODE_ENV == "production";
+
+class CopyToTargetPlugin {
+  apply(compiler) {
+    compiler.hooks.done.tap("CopyToTargetPlugin", (stats) => {
+      if (stats.hasErrors()) {
+          console.log("[CopyToTargetPlugin] Build has errors, skipping copy.");
+          return;
+      }
+      const targetDir = "C:\\betterncm\\plugins_dev\\mytheme";
+      const distDir = path.resolve(__dirname, "dist");
+
+      if (!fs.existsSync(targetDir)) {
+        try {
+            fs.mkdirSync(targetDir, { recursive: true });
+        } catch (e) {
+            console.error("[CopyToTargetPlugin] Failed to create target directory:", e);
+            return;
+        }
+      }
+
+      try {
+        if (fs.existsSync(distDir)) {
+            const files = fs.readdirSync(distDir);
+            files.forEach((file) => {
+            const srcFile = path.join(distDir, file);
+            const destFile = path.join(targetDir, file);
+
+            if (fs.lstatSync(srcFile).isFile()) {
+                fs.copyFileSync(srcFile, destFile);
+                console.log(`[CopyToTargetPlugin] Copied ${file} to ${targetDir}`);
+            }
+            });
+        }
+      } catch (err) {
+        console.error("[CopyToTargetPlugin] Error copying files:", err);
+      }
+    });
+  }
+}
 
 /*const stylesHandler = isProduction
   ? MiniCssExtractPlugin.loader
@@ -41,6 +81,7 @@ const config = {
 
     // Add your plugins here
     // Learn more about plugins from https://webpack.js.org/configuration/plugins/
+    new CopyToTargetPlugin(),
   ],
   module: {
     rules: [
